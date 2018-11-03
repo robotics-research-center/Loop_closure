@@ -124,7 +124,7 @@ Eigen::Matrix4f simple_icp(PointCloudT::Ptr source, PointCloudT::Ptr target, pcl
 void simple_visualize(const PointCloudT::Ptr cloud1, const PointCloudT::Ptr cloud2, const pcl::Correspondences& correspond={}){
 	pcl::visualization::PCLVisualizer viewer("ICP");
 	viewer.addCorrespondences<PointT>(cloud1, cloud2, correspond);
-	pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb1(cloud1);
+	pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb1(cloud1, 230, 20, 20);;
 	pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb2(cloud2);
 	viewer.addPointCloud(cloud1, rgb1, "cloud1");
 	viewer.addPointCloud(cloud2, rgb2, "cloud2");
