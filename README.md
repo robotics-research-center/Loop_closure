@@ -1,8 +1,8 @@
 ## Description: ##
 
 1. **manual_icp/feature_detection.cpp** : Gives the R-T and the loop closing edge for g2o file, RGB and Depth images are used to calculate SIFT features and the correspondences. Then the depth image is converted into PointCloud which is given to the ICP along with correspondences.  
-	*Usage:* ./feature_detection rgb1.png rgb2.png depth1.png depth2.png  
-	*Download data:* from [here](https://drive.google.com/drive/folders/1AmbcwgK6rQJtM-TxdzpmFXIA18UK4Pl3?usp=sharing)
+	1. *Usage:* ./feature_detection rgb1.png rgb2.png depth1.png depth2.png  
+	2. *Download data:* from [here](https://drive.google.com/drive/folders/1AmbcwgK6rQJtM-TxdzpmFXIA18UK4Pl3?usp=sharing)
 
 2. **Reading Resources** :
 	1. [ICP](http://pointclouds.org/documentation/tutorials/iterative_closest_point.php)
@@ -13,8 +13,8 @@
 	6. [Pixel coordinates from key point](https://stackoverflow.com/questions/30716610/how-to-get-pixel-coordinates-from-feature-matching-in-opencv-python)
 
 3. **cloud_assemble/cloud_assemble.cpp** : Concatanates the PointClouds on the basis of optimized g2o file. Load the first PointCloud and add it to the global map as it is, then rest PointClouds are individually transformed according to the optimized edge constraints in "*EDGE_SE3:QUAT*" and added to global map to form a single pcd file.  
-	*Usage:* ./cloud_assemble optimized.g2o /path/to/clouds  
-	*Download data:* from the above mentioned database download link  
+	1. *Usage:* ./cloud_assemble optimized.g2o /path/to/clouds  
+	2. *Download data:* from the above mentioned database download link  
 
 4. **rtabmap_configuration/rtabmap.ini** : Contains the changeable parameters in RTABMap.  
 	1. *Changed Parameters:*   
