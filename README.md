@@ -15,3 +15,10 @@
 3. **cloud_assemble/cloud_assemble.cpp** : Concatanates the PointClouds on the basis of optimized g2o file. Load the first PointCloud and add it to the global map as it is, then rest PointClouds are individually transformed according to the optimized edge constraints in "*EDGE_SE3:QUAT*" and added to global map to form a single pcd file.
 	*Usage:* ./cloud_assemble optimized.g2o /path/to/clouds
 	*Download data:* from the above mentioned database download link 
+
+4. **rtabmap_configuration/rtabmap.ini** : Contains the changeable parameters in RTABMap.
+	*Changed Parameters:* 
+		1. 	<param name="Reg/Force3Dof" value="true"/>
+		2.	<param name="Optimizer/Slam2D" value="true"/>
+		3.	<param name="Optimizer/Strategy" value="0"/>
+		4.	<param name="Optimizer/VarianceIgnored" value="0"/>
