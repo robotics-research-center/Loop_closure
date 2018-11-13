@@ -18,7 +18,7 @@
 
 4. **rtabmap_configuration/rtabmap.ini** : Contains the changeable parameters in RTABMap.  
 	*Changed Parameters:*   
-		1. 	<param name="Reg/Force3Dof" value="true"/>
-		2.	<param name="Optimizer/Slam2D" value="true"/>
-		3.	<param name="Optimizer/Strategy" value="0"/>
-		4.	<param name="Optimizer/VarianceIgnored" value="0"/>
+		1. 	param name="Reg/Force3Dof" value="true"
+		2.	param name="Optimizer/Slam2D" value="true"
+		3.	param name="Optimizer/Strategy" value="0"
+		4.	param name="Optimizer/VarianceIgnored" value="0"
