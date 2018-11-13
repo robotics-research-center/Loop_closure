@@ -16,7 +16,7 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 void display_image(const Mat& image){
 	namedWindow("opencv_viewer", WINDOW_AUTOSIZE);
 	imshow("opencv_viewer", image);
-	waitKey(2500);
+	waitKey(3000);
 	destroyWindow("opencv_viewer");
 }
 
@@ -124,7 +124,7 @@ Eigen::Matrix4f simple_icp(PointCloudT::Ptr source, PointCloudT::Ptr target, pcl
 void simple_visualize(const PointCloudT::Ptr cloud1, const PointCloudT::Ptr cloud2, const pcl::Correspondences& correspond={}){
 	pcl::visualization::PCLVisualizer viewer("ICP");
 	viewer.addCorrespondences<PointT>(cloud1, cloud2, correspond);
-	pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb1(cloud1, 230, 20, 20);;
+	pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb1(cloud1, 230, 20, 20);
 	pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb2(cloud2);
 	viewer.addPointCloud(cloud1, rgb1, "cloud1");
 	viewer.addPointCloud(cloud2, rgb2, "cloud2");
@@ -147,6 +147,8 @@ void homogeneous_to_quaternion(const Eigen::Matrix4f &homogeneous){
 			rotate(i,j) = homogeneous(i,j);
 	Eigen::Quaternionf q(rotate);
 	
+	cout << "Homogeneous matrix: \n" << homogeneous << endl;
+	cout << "Homogeneous inverse:\n" << homogeneous.inverse() << endl;	
 	fprintf(stdout, "\nTranslation \n%f %f %f\n", homogeneous(0,3), homogeneous(1,3), homogeneous(2,3));
 	Eigen::Matrix<float, 4, 1> coeffs = q.coeffs();	
 	fprintf(stdout, "Quaternion:\n%f %f %f %f\n", coeffs[0], coeffs[1], coeffs[2], coeffs[3]);

@@ -16,10 +16,6 @@ add_definitions(${PCL_DEFINITIONS})
 
 set(ALL_LIBS ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
-add_executable(cv_test cv_test.cpp)
-add_executable(color2gray color2gray.cpp)
 add_executable(feature_detection feature_detection.cpp)
 
-target_link_libraries(cv_test ${ALL_LIBS})
-target_link_libraries(color2gray ${ALL_LIBS})
 target_link_libraries(feature_detection ${ALL_LIBS})
