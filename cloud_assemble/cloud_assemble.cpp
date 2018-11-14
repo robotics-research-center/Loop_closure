@@ -9,6 +9,7 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/registration/icp.h>
+#include <pcl/filters/voxel_grid.h>
 
 using namespace std;
 using namespace pcl;
@@ -151,6 +152,27 @@ private:
 		*assembled_map += *new_point_cloud;
 	}
 
+	void simple_voxelize(void){
+		pcl::VoxelGrid<PointT> voxel;
+		voxel.setInputCloud(new_point_cloud);
+		voxel.setLeafSize(0.05f, 0.05f, 0.05f);
+		voxel.filter(*new_point_cloud);
+	}
+
+	void red_colorization(void){
+		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
+			new_point_cloud->points[index].r = 230;
+			new_point_cloud->points[index].g = 20;
+			new_point_cloud->points[index].b = 20;
+		}
+	}
+
+	void network_prediction(int cloud_index){
+		if(cloud_index<100){
+			red_colorization();
+		}
+	}
+
 public:
 	cloudOperations(const char* arg_directory, vector<vector<float>> arg_transforms):
 					directory{arg_directory},
@@ -184,7 +206,9 @@ public:
 			if(cloud_queue[cloud_to_load] == false){
 				cloud_queue[cloud_to_load] = true;
 				load_point_cloud(cloud_to_load);
-				transform_point_cloud(transforms[i]);
+				simple_voxelize();
+				network_prediction(cloud_to_load);
+				//transform_point_cloud(transforms[i]);
 				add_to_map();
 			}
 		}
