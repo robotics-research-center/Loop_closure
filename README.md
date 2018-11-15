@@ -23,3 +23,4 @@
 		3.	param name="Optimizer/Strategy" value="0"
 		4.	param name="Optimizer/VarianceIgnored" value="0"
 
+5. **docs/**: Contains reading resources to papers. 
