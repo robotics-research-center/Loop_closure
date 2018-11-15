@@ -87,7 +87,7 @@ private:
 	map<int, bool> cloud_queue;
 	PointCloudT::Ptr assembled_map;
 	PointCloudT::Ptr new_point_cloud;
-	vector<vector<float>> transforms;
+	vector<vector<float>>& transforms;
 
 private:
 	int get_cloud_number(const string &str){
@@ -152,29 +152,58 @@ private:
 		*assembled_map += *new_point_cloud;
 	}
 
-	void simple_voxelize(void){
+	void simple_voxelize(float leaf_size){
 		pcl::VoxelGrid<PointT> voxel;
 		voxel.setInputCloud(new_point_cloud);
-		voxel.setLeafSize(0.05f, 0.05f, 0.05f);
+		voxel.setLeafSize(leaf_size, leaf_size, leaf_size);
 		voxel.filter(*new_point_cloud);
 	}
 
 	void red_colorization(void){
 		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
-			new_point_cloud->points[index].r = 230;
-			new_point_cloud->points[index].g = 20;
-			new_point_cloud->points[index].b = 20;
+			new_point_cloud->points[index].r += 200;
+			new_point_cloud->points[index].g += 0;
+			new_point_cloud->points[index].b += 0;
+		}
+	}
+
+	void green_colorization(void){
+		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
+			new_point_cloud->points[index].r += 0;
+			new_point_cloud->points[index].g += 200;
+			new_point_cloud->points[index].b += 0;
 		}
 	}
 
 	void network_prediction(int cloud_index){
-		if(cloud_index<100){
+		vector<int>between_racks{62, 65, 66, 67, 68, 69, 70, 71, 141, 142, 143, 144, 145,
+					147, 153, 154, 155, 156};
+		for(int index=120; index<=131; ++index){
+			between_racks.push_back(index);
+		}
+
+		vector<int>corridor{72, 73, 74, 75, 76, 77, 78, 79, 132, 133, 136, 138, 139,
+						140};
+		for(int index=81; index<=119; ++index){
+			corridor.push_back(index);
+		}
+
+
+		if(std::find(between_racks.begin(), between_racks.end(), cloud_index) != between_racks.end()){
 			red_colorization();
+		}
+
+		else if(std::find(corridor.begin(), corridor.end(), cloud_index) != corridor.end()){
+			green_colorization();
 		}
 	}
 
+	void save_to_pcd(string output_path){
+		pcl::io::savePCDFileASCII(output_path, *assembled_map);
+	}
+
 public:
-	cloudOperations(const char* arg_directory, vector<vector<float>> arg_transforms):
+	cloudOperations(const char* arg_directory, vector<vector<float>>& arg_transforms):
 					directory{arg_directory},
 					transforms{arg_transforms}, 
 					new_point_cloud{new PointCloudT()},
@@ -197,8 +226,8 @@ public:
 	}
 
 	void assemble_clouds(void){
-		cloud_queue[1] = true;
-		load_point_cloud(1);
+		cloud_queue[62] = true;
+		load_point_cloud(62);
 		add_to_map();
 		
 		for(size_t i=0; i<transforms.size(); ++i){
@@ -206,13 +235,14 @@ public:
 			if(cloud_queue[cloud_to_load] == false){
 				cloud_queue[cloud_to_load] = true;
 				load_point_cloud(cloud_to_load);
-				simple_voxelize();
+				simple_voxelize(0.01f);
 				network_prediction(cloud_to_load);
 				//transform_point_cloud(transforms[i]);
 				add_to_map();
 			}
 		}
 		simple_visualize();
+		save_to_pcd("/home/udit/Desktop/assembled2.pcd");
 	}
 };
 
