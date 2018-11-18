@@ -18,9 +18,9 @@ private:
 	Mat &rgb1, &rgb2, &depth1, &depth2;
 	vector<KeyPoint> keypoints1, keypoints2;
 	vector<DMatch> matches;
-    Mat matched_image;
-    vector<pair<int, int>>& kps1_coord;
-    vector<pair<int, int>>& kps2_coord;	
+	Mat matched_image;
+	vector<pair<int, int>>& kps1_coord;
+	vector<pair<int, int>>& kps2_coord;	
 
 private:
 	void display_corresponding_image(void){
@@ -32,21 +32,21 @@ private:
 
 	void match_keypoints(void){
 		const int count_features = 550;
-	    Ptr<xfeatures2d::SIFT> feature_detect = xfeatures2d::SIFT::create(count_features);
-	    Mat descriptors1, descriptors2;
-	    feature_detect->detectAndCompute(rgb1, noArray(), keypoints1, descriptors1);
-	    feature_detect->detectAndCompute(rgb2, noArray(), keypoints2, descriptors2);
-	    
-	    Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(DescriptorMatcher::FLANNBASED);
-	    vector<vector<DMatch>> knn_matches;
-	    matcher->knnMatch(descriptors1, descriptors2, knn_matches, 2);
+		Ptr<xfeatures2d::SIFT> feature_detect = xfeatures2d::SIFT::create(count_features);
+		Mat descriptors1, descriptors2;
+		feature_detect->detectAndCompute(rgb1, noArray(), keypoints1, descriptors1);
+		feature_detect->detectAndCompute(rgb2, noArray(), keypoints2, descriptors2);
+		
+		Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(DescriptorMatcher::FLANNBASED);
+		vector<vector<DMatch>> knn_matches;
+		matcher->knnMatch(descriptors1, descriptors2, knn_matches, 2);
 
-	    const float threshold_ratio = 0.7f;
-	    for(size_t i=0; i<knn_matches.size(); ++i){
-	    	if(knn_matches[i][0].distance < threshold_ratio * knn_matches[i][1].distance)
-	    		matches.push_back(knn_matches[i][0]);
-	    }
-	    drawMatches(rgb1, keypoints1, rgb2, keypoints2, matches, matched_image);
+		const float threshold_ratio = 0.7f;
+		for(size_t i=0; i<knn_matches.size(); ++i){
+			if(knn_matches[i][0].distance < threshold_ratio * knn_matches[i][1].distance)
+				matches.push_back(knn_matches[i][0]);
+		}
+		drawMatches(rgb1, keypoints1, rgb2, keypoints2, matches, matched_image);
 	}
 
 	void kps_to_pixel_coordinates(void){
@@ -70,20 +70,20 @@ public:
 
 	void start_processing(void){
 		match_keypoints();
-    	kps_to_pixel_coordinates();
-    	display_corresponding_image();
+		kps_to_pixel_coordinates();
+		display_corresponding_image();
 	}
 };
 
 class CloudOperations{
 private:
 	Mat &rgb1, &rgb2, &depth1, &depth2;
-    vector<pair<int, int>>& kps1_coord;
-    vector<pair<int, int>>& kps2_coord;
-    vector<int> cloud_indexes1, cloud_indexes2;
-    PointCloudT::Ptr source, target;
-    pcl::Correspondences correspondences;
-    Eigen::Matrix4f homogeneous;
+	vector<pair<int, int>>& kps1_coord;
+	vector<pair<int, int>>& kps2_coord;
+	vector<int> cloud_indexes1, cloud_indexes2;
+	PointCloudT::Ptr source, target;
+	pcl::Correspondences correspondences;
+	Eigen::Matrix4f homogeneous;
 
 private:
 	PointCloudT::Ptr images2cloud(const Mat& rgb_image, const Mat& depth_image, const vector<pair<int, int>> &coordinates, vector<int>& out_cloud_indexes){
@@ -195,37 +195,37 @@ public:
 	
 	void start_processing(void){
 		source = images2cloud(rgb1, depth1, kps1_coord, cloud_indexes1);
-    	target = images2cloud(rgb2, depth2, kps2_coord, cloud_indexes2);
-    	fill_correspondences();
-    	simple_icp();
-    	homogeneous_to_quaternion();
-    	simple_visualize();
+		target = images2cloud(rgb2, depth2, kps2_coord, cloud_indexes2);
+		fill_correspondences();
+		simple_icp();
+		homogeneous_to_quaternion();
+		simple_visualize();
 	}
 };
 
 
 int main(int argc, char* argv[] ){
-    if(argc != 5){
-    	fprintf(stdout, "Usage: ./sift_icp rgb1.png rgb2.png depth1.png depth2.png\n");
-    	return 1;
-    }
-    Mat rgb1 = imread(argv[1], IMREAD_COLOR );
-    Mat rgb2 = imread(argv[2], IMREAD_COLOR );
-    Mat depth1 = imread(argv[3], IMREAD_ANYDEPTH);
-    Mat depth2 = imread(argv[4], IMREAD_ANYDEPTH);
-    if(rgb1.empty() || rgb2.empty()){
-    	fprintf(stdout, "Unable to open images\n");
-    	return 1;
-    }
- 	
- 	vector<pair<int, int>> kps1_coord;
- 	vector<pair<int, int>> kps2_coord;   
-    
-   	ImageOperations image_processor{rgb1, rgb2, depth1, depth2, kps1_coord, kps2_coord};
-    image_processor.start_processing();
+	if(argc != 5){
+		fprintf(stdout, "Usage: ./sift_icp rgb1.png rgb2.png depth1.png depth2.png\n");
+		return 1;
+	}
+	Mat rgb1 = imread(argv[1], IMREAD_COLOR );
+	Mat rgb2 = imread(argv[2], IMREAD_COLOR );
+	Mat depth1 = imread(argv[3], IMREAD_ANYDEPTH);
+	Mat depth2 = imread(argv[4], IMREAD_ANYDEPTH);
+	if(rgb1.empty() || rgb2.empty()){
+		fprintf(stdout, "Unable to open images\n");
+		return 1;
+	}
+	
+	vector<pair<int, int>> kps1_coord;
+	vector<pair<int, int>> kps2_coord;   
+	
+	ImageOperations image_processor{rgb1, rgb2, depth1, depth2, kps1_coord, kps2_coord};
+	image_processor.start_processing();
 
-    CloudOperations cloud_processor{rgb1, rgb2, depth1, depth2, kps1_coord, kps2_coord};
- 	cloud_processor.start_processing();
+	CloudOperations cloud_processor{rgb1, rgb2, depth1, depth2, kps1_coord, kps2_coord};
+	cloud_processor.start_processing();
 
-    return 0;
+	return 0;
 }
