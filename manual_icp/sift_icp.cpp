@@ -157,7 +157,7 @@ void homogeneous_to_quaternion(const Eigen::Matrix4f &homogeneous){
 
 int main( int argc, char* argv[] ){
     if(argc != 5){
-    	fprintf(stdout, "Usage: ./feature_detection rgb1.png rgb2.png depth1.png depth2.png\n");
+    	fprintf(stdout, "Usage: ./sift_icp rgb1.png rgb2.png depth1.png depth2.png\n");
     	return 1;
     }
     Mat rgb1 = imread(argv[1], IMREAD_COLOR );

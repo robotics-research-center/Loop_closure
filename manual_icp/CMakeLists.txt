@@ -16,6 +16,6 @@ add_definitions(${PCL_DEFINITIONS})
 
 set(ALL_LIBS ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
-add_executable(feature_detection feature_detection.cpp)
+add_executable(sift_icp sift_icp.cpp)
 
-target_link_libraries(feature_detection ${ALL_LIBS})
+target_link_libraries(sift_icp ${ALL_LIBS})
