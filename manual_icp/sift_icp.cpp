@@ -7,6 +7,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl/registration/registration.h>
 #include <Eigen/Dense>
+#include <pcl/io/pcd_io.h>
 
 using namespace cv;
 using namespace std;
@@ -35,7 +36,7 @@ private:
 	}
 
 	void match_keypoints(void){
-		const int count_features = 550;
+		const int count_features = 500;
 		Ptr<xfeatures2d::SIFT> feature_detect = xfeatures2d::SIFT::create(count_features);
 		Mat descriptors1, descriptors2;
 		feature_detect->detectAndCompute(rgb1, noArray(), keypoints1, descriptors1);
@@ -94,8 +95,6 @@ private:
 										vector<int>& out_cloud_indexes, vector<int>& cloud_keypoints){
 		const float f = 570.3, cx = 320.0, cy = 240.0;
 		PointCloudT::Ptr cloud(new PointCloudT());
-		cloud->width = rgb_image.cols;
-		cloud->height = rgb_image.rows;
 		cloud->is_dense = false;
 		float bad_point = std::numeric_limits<float>::quiet_NaN();
 		int image_index = 0;
@@ -125,6 +124,8 @@ private:
 				}
 			}
 		}
+		cloud->width = cloud->points.size();
+		cloud->height = 1;
 		return cloud;
 	}
 
@@ -215,6 +216,10 @@ private:
 			viewer.spinOnce();
 	}
 
+	void save_to_pcd(string output_path){
+		pcl::io::savePCDFileASCII(output_path, *source + *target);
+		fprintf(stdout, "Assemlbed Point Cloud saved to: %s\n", output_path.c_str());
+	}
 
 public:
 	CloudOperations(Mat& arg_rgb1, Mat& arg_rgb2, Mat& arg_depth1, Mat& arg_depth2, 
@@ -242,6 +247,7 @@ public:
 		simple_icp();
 		display_homogeneous_to_quaternion();
 		simple_visualize();
+		save_to_pcd("/home/udit/Desktop/assembled.pcd");
 	}
 };
 
