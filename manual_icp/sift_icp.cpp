@@ -11,6 +11,9 @@
 using namespace cv;
 using namespace std;
 
+#define PI 3.1415
+#define rad2deg(num)(num * 180/PI)
+
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 
@@ -27,7 +30,7 @@ private:
 	void display_corresponding_image(void){
 		namedWindow("opencv_viewer", WINDOW_AUTOSIZE);
 		imshow("opencv_viewer", matched_image);
-		waitKey(2500);
+		waitKey(0);
 		destroyWindow("opencv_viewer");
 	}
 
@@ -52,8 +55,6 @@ private:
 
 	void kps_to_pixel_coordinates(void){
 		for(vector<DMatch>::const_iterator iter=matches.begin(); iter!=matches.end(); ++iter){
-			/*fprintf(stdout, "[%d %d] \t[%d %d]\n", int(kps1[iter->queryIdx].pt.x), int(kps1[iter->queryIdx].pt.y), 
-					int(kps2[iter->trainIdx].pt.x), int(kps2[iter->trainIdx].pt.y));*/
 			kps1_coord.push_back(make_pair(int(keypoints1[iter->queryIdx].pt.x), int(keypoints1[iter->queryIdx].pt.y)));
 			kps2_coord.push_back(make_pair(int(keypoints2[iter->trainIdx].pt.x), int(keypoints2[iter->trainIdx].pt.y)));
 		}
@@ -89,7 +90,7 @@ private:
 	vector<int> cloud2_keypoints;
 
 private:
-	PointCloudT::Ptr images2cloud_debug(const Mat& rgb_image, const Mat& depth_image, const vector<pair<int, int>> &coordinates, 
+	PointCloudT::Ptr images2cloud(const Mat& rgb_image, const Mat& depth_image, const vector<pair<int, int>> &coordinates, 
 										vector<int>& out_cloud_indexes, vector<int>& cloud_keypoints){
 		const float f = 570.3, cx = 320.0, cy = 240.0;
 		PointCloudT::Ptr cloud(new PointCloudT());
@@ -150,6 +151,15 @@ private:
 			cout << correspondences[i] << endl;
 		}
 	}
+
+	void translate_cloud(const Eigen::Matrix4f& transform){
+		transformPointCloud(*target, *target, transform);
+	}
+
+	void translate_cloud(const Eigen::Affine3f& transform){
+		transformPointCloud(*target, *target, transform);
+	}
+
 	void simple_icp(void){
 		if(correspondences.size() == 0){
 			cout << "Doing align\n";
@@ -167,7 +177,7 @@ private:
 			pcl::registration::TransformationEstimationSVD<PointT, PointT> transform_estimation;
 			transform_estimation.estimateRigidTransformation(*source, *target, correspondences, homogeneous);
 		}
-		transformPointCloud(*target, *target, homogeneous.inverse());
+		translate_cloud(homogeneous.inverse());
 	}
 
 	void display_homogeneous_to_quaternion(void){
@@ -178,24 +188,33 @@ private:
 		Eigen::Quaternionf q(rotate);
 		
 		cout << "Homogeneous matrix: \n" << homogeneous << endl;
-		cout << "Homogeneous inverse:\n" << homogeneous.inverse() << endl;	
 		fprintf(stdout, "\nTranslation \n%f %f %f\n", homogeneous(0,3), homogeneous(1,3), homogeneous(2,3));
 		Eigen::Matrix<float, 4, 1> coeffs = q.coeffs();	
 		fprintf(stdout, "Quaternion:\n%f %f %f %f\n", coeffs[0], coeffs[1], coeffs[2], coeffs[3]);
 		fprintf(stdout, "g2o edge:\n%f %f 0 0 0 %f %f\n", homogeneous(0,3), homogeneous(1,3), coeffs[2], coeffs[3]);
+		auto euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
+		fprintf(stdout, "Quaternion to euler in degree: %g %g %g\n",rad2deg(euler[0]), rad2deg(euler[1]), rad2deg(euler[2]) );
+	}
+
+	Eigen::Affine3f get_custom_translation(void){
+		Eigen::Affine3f translate = Eigen::Affine3f::Identity();
+		translate.translation() << 0.0, 0.0, 25;
+		translate.rotate(Eigen::AngleAxisf(PI, Eigen::Vector3f::UnitY()));
+		return translate;
 	}
 
 	void simple_visualize(void){
 		pcl::visualization::PCLVisualizer viewer("ICP");
+		viewer.addCoordinateSystem(1.0);
 		viewer.addCorrespondences<PointT>(source, target, correspondences);
-		pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb1(source, 230, 20, 20);
+		pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb1(source);
 		pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb2(target);
 		viewer.addPointCloud(source, rgb1, "source");
 		viewer.addPointCloud(target, rgb2, "target");
-		//viewer.setBackgroundColor(255, 255, 255, 0);
 		while(! viewer.wasStopped())
 			viewer.spinOnce();
 	}
+
 
 public:
 	CloudOperations(Mat& arg_rgb1, Mat& arg_rgb2, Mat& arg_depth1, Mat& arg_depth2, 
@@ -211,9 +230,12 @@ public:
 	
 	void start_processing(void){
 		fprintf(stdout, "Size of kps1_coord: %lu\nSize of kps2_coord: %lu\n", kps1_coord.size(), kps2_coord.size());
-		source = images2cloud_debug(rgb1, depth1, kps1_coord, cloud_indexes1, cloud1_keypoints);
-		target = images2cloud_debug(rgb2, depth2, kps2_coord, cloud_indexes2, cloud2_keypoints);
+		source = images2cloud(rgb1, depth1, kps1_coord, cloud_indexes1, cloud1_keypoints);
+		target = images2cloud(rgb2, depth2, kps2_coord, cloud_indexes2, cloud2_keypoints);
 		fill_correspondences();
+		Eigen::Affine3f translate = get_custom_translation();
+		translate_cloud(translate);
+		simple_visualize();
 		// print_cloud_keypoints(cloud_indexes1, cloud1_keypoints);
 		// print_cloud_keypoints(cloud_indexes2, cloud2_keypoints);
 		// print_correspondences();
