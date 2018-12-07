@@ -16,12 +16,7 @@
 	1. *Usage:* `./cloud_assemble optimized.g2o /path/to/clouds`  
 	2. *Download data:* from the above mentioned database download link  
 
-4. **rtabmap_configuration/rtabmap.ini** : Contains the changeable parameters in RTABMap.  
-	1. *Changed Parameters:*  
-		1. 	param name="Reg/Force3Dof" value="true"  
-		2.	param name="Optimizer/Slam2D" value="true"  
-		3.	param name="Optimizer/Strategy" value="0"  
-		4.	param name="Optimizer/VarianceIgnored" value="true"
+4. **launch_scripts** : Contains launching scripts and configurations files for RTABMAP and Realsense.  
 
 5. **docs/**: Contains reading resources to papers. 
 
