@@ -21,7 +21,7 @@
 		1. 	param name="Reg/Force3Dof" value="true"  
 		2.	param name="Optimizer/Slam2D" value="true"  
 		3.	param name="Optimizer/Strategy" value="0"  
-		4.	param name="Optimizer/VarianceIgnored" value="0"
+		4.	param name="Optimizer/VarianceIgnored" value="true"
 
 5. **docs/**: Contains reading resources to papers. 
 
