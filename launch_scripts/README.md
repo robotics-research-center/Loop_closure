@@ -1,12 +1,12 @@
 ## Description ##
 
-1. **export_rgb.launch**: Playback bag file and export raw images to `~/.ros`
-
-2. **realsense_launch_record.sh**: Launch realsense and record following topics to a bagfile:
+1. **realsense_launch_record.sh**: Launch realsense and record following topics to a bagfile:
 	1. /camera/aligned_depth_to_color/image_raw 
 	2. /camera/color/image_raw/compressed
 	3. /camera/color/camera_info 
 	4. /tf_static
+
+2. **export_rgb.launch**: Playback bag file and export raw images to `~/.ros`
 
 3. **rtabmap.ini**: Contains changeable parameters for RTABMAP.
 	1. *Changed Parameters:*  

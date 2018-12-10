@@ -10,3 +10,9 @@
 
 2. *Comparison of various slam softwares with RTABMAP* : [Labbe18JFR_preprint.pdf
 ](https://introlab.3it.usherbrooke.ca/mediawiki-introlab/images/7/7a/Labbe18JFR_preprint.pdf) 
+
+3. *Visual odometry used in RTABMAP* : [ROS_ANSWERS](https://answers.ros.org/question/241665/paper-related-to-rtabmap-odometry/)
+
+4. *Frontend, Backend and Visualization in RTABMAP* : [RTABMAP Forum](http://official-rtab-map-forum.67519.x6.nabble.com/How-does-RGBD-Slam-works-td191.html)
+
+5. *Slides of Registration Module in PCL* : [Here](http://www.pointclouds.org/assets/files/presentations/holz_intern_presentation.pdf)
