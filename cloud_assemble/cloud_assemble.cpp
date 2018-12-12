@@ -17,6 +17,7 @@ using namespace pcl;
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 
+
 class g2oParser{
 private:
 	vector<vector<float>> transforms;
@@ -76,10 +77,11 @@ public:
 			for(size_t index=0; index<transform.size(); ++index){
 				cout << transform[index] << " ";
 			}
-			cout << endl;
+			cout << "\n";
 		}
 	}
 };
+
 
 class cloudOperations{
 private:
@@ -88,6 +90,7 @@ private:
 	PointCloudT::Ptr assembled_map;
 	PointCloudT::Ptr new_point_cloud;
 	vector<vector<float>>& transforms;
+	map<int, int>& image_labels;
 
 private:
 	int get_cloud_number(const string &str){
@@ -161,41 +164,50 @@ private:
 
 	void red_colorization(void){
 		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
-			new_point_cloud->points[index].r += 200;
-			new_point_cloud->points[index].g += 0;
-			new_point_cloud->points[index].b += 0;
+			new_point_cloud->points[index].r = 200;
+			new_point_cloud->points[index].g = 0;
+			new_point_cloud->points[index].b = 0;
 		}
 	}
 
 	void green_colorization(void){
 		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
-			new_point_cloud->points[index].r += 0;
-			new_point_cloud->points[index].g += 200;
-			new_point_cloud->points[index].b += 0;
+			new_point_cloud->points[index].r = 0;
+			new_point_cloud->points[index].g = 200;
+			new_point_cloud->points[index].b = 0;
+		}
+	}
+
+	void blue_colorization(void){
+		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
+			new_point_cloud->points[index].r = 0;
+			new_point_cloud->points[index].g = 0;
+			new_point_cloud->points[index].b = 200;
+		}
+	}
+
+	void yellow_colorization(void){
+		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
+			new_point_cloud->points[index].r = 200;
+			new_point_cloud->points[index].g = 200;
+			new_point_cloud->points[index].b = 0;
+		}
+	}
+
+	void violet_colorization(void){
+		for(size_t index=0; index<new_point_cloud->points.size(); ++index){
+			new_point_cloud->points[index].r = 200;
+			new_point_cloud->points[index].g = 100;
+			new_point_cloud->points[index].b = 200;
 		}
 	}
 
 	void network_prediction(int cloud_index){
-		vector<int>between_racks{62, 65, 66, 67, 68, 69, 70, 71, 141, 142, 143, 144, 145,
-					147, 153, 154, 155, 156};
-		for(int index=120; index<=131; ++index){
-			between_racks.push_back(index);
-		}
-
-		vector<int>corridor{72, 73, 74, 75, 76, 77, 78, 79, 132, 133, 136, 138, 139,
-						140};
-		for(int index=81; index<=119; ++index){
-			corridor.push_back(index);
-		}
-
-
-		if(std::find(between_racks.begin(), between_racks.end(), cloud_index) != between_racks.end()){
-			red_colorization();
-		}
-
-		else if(std::find(corridor.begin(), corridor.end(), cloud_index) != corridor.end()){
-			green_colorization();
-		}
+		if(image_labels[cloud_index] == 1){ red_colorization();}
+		else if(image_labels[cloud_index] == 2){ green_colorization();}
+		else if(image_labels[cloud_index] == 3){ blue_colorization();}
+		else if(image_labels[cloud_index] == 4){ yellow_colorization();}
+		else if(image_labels[cloud_index] == 5){ violet_colorization();}
 	}
 
 	void save_to_pcd(string output_path){
@@ -203,9 +215,11 @@ private:
 	}
 
 public:
-	cloudOperations(const char* arg_directory, vector<vector<float>>& arg_transforms):
+	cloudOperations(const char* arg_directory, vector<vector<float>>& arg_transforms,
+					map<int, int>& image_predictions) :
 					directory{arg_directory},
-					transforms{arg_transforms}, 
+					transforms{arg_transforms},
+					image_labels{image_predictions},
 					new_point_cloud{new PointCloudT()},
 					assembled_map{new PointCloudT}{
 						load_cloud_queue();
@@ -246,9 +260,53 @@ public:
 	}
 };
 
+
+class predictionFilesParser{
+private:
+	map<int, int>& image_labels;
+	const char* images_file;
+	const char* predictions_file;
+	const string keyword = "/rgb/";
+
+private:
+	void parse_files(void){
+		ifstream images_read(images_file), labels_read(predictions_file);
+		string images_line, labels_line;
+		if(images_read.is_open() && labels_read.is_open()){
+			while(getline(images_read, images_line) && getline(labels_read, labels_line)){
+				size_t found = images_line.find(keyword);
+				if(found!=string::npos){
+					string image_number="";
+					for(int i=found+keyword.size(); images_line[i]!='.'; ++i){
+						image_number += images_line[i];
+					}
+					image_labels.insert(pair<int, int>(stoi(image_number), stoi(labels_line)));
+				}
+			}
+		}
+	}
+
+public:
+	predictionFilesParser(map<int ,int>& image_predictions, 
+							const char* arg_images_file,
+							const char* arg_predictions_file) :
+	image_labels{image_predictions},
+	images_file{arg_images_file},
+	predictions_file{arg_predictions_file}{
+		parse_files();
+	};
+
+	void print_info(void){
+		for(pair<int, int> image_label : image_labels){
+			fprintf(stdout, "Image number: %d\tbelongs to label: %d\n", image_label.first, image_label.second);	
+		}
+	}
+};
+
+
 int main(int argc, char const *argv[]){
-	if(argc != 3){
-		cerr << "Usage: ./cloud_assemble file.g2o /path/to/clouds/\n";
+	if(argc != 5){
+		cerr << "Usage: ./cloud_assemble file.g2o /path/to/clouds/ images_file.txt predictions_file.txt\n";
 		return 1;
 	}
 
@@ -256,10 +314,13 @@ int main(int argc, char const *argv[]){
 	vector<vector<float>> transforms = parser.get_transforms();
 	//parser.print_transforms();
 
-	cloudOperations cloud_parser(argv[2], transforms);
+	map<int, int> image_predictions;
+	predictionFilesParser prediction_parser(image_predictions, argv[3], argv[4]); 
+	prediction_parser.print_info();
+
+	cloudOperations cloud_parser(argv[2], transforms ,image_predictions);
 	cloud_parser.print_cloud_info();
 	cloud_parser.assemble_clouds();
-
 
 	return 0;
 }
