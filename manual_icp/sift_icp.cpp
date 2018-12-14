@@ -8,6 +8,7 @@
 #include <pcl/registration/registration.h>
 #include <Eigen/Dense>
 #include <pcl/io/pcd_io.h>
+#include <pcl/visualization/registration_visualizer.h>
 
 using namespace cv;
 using namespace std;
@@ -39,13 +40,14 @@ private:
 		const int count_features = 500;
 		Ptr<xfeatures2d::SIFT> feature_detect = xfeatures2d::SIFT::create(count_features);
 		Mat descriptors1, descriptors2;
+
 		feature_detect->detectAndCompute(rgb1, noArray(), keypoints1, descriptors1);
 		feature_detect->detectAndCompute(rgb2, noArray(), keypoints2, descriptors2);
 		
 		Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(DescriptorMatcher::FLANNBASED);
 		vector<vector<DMatch>> knn_matches;
 		matcher->knnMatch(descriptors1, descriptors2, knn_matches, 2);
-
+		
 		const float threshold_ratio = 0.7f;
 		for(size_t i=0; i<knn_matches.size(); ++i){
 			if(knn_matches[i][0].distance < threshold_ratio * knn_matches[i][1].distance)
@@ -109,6 +111,14 @@ private:
 					point.z = depth_image.at<unsigned short>(y, x)/1000.0;
 					point.x = (x - cx) * point.z / f;
 					point.y = (y - cy) * point.z / f;
+					
+					float temp_z = point.z; 
+					float temp_x = point.x;
+					float temp_y = point.y;
+					point.x = temp_z;
+					point.z = -temp_y;
+					point.y = -temp_x;
+
 					point.r = rgb_image.at<cv::Vec3b>(y, x)[2];
 					point.g = rgb_image.at<cv::Vec3b>(y, x)[1];
 					point.b = rgb_image.at<cv::Vec3b>(y, x)[0];
@@ -190,7 +200,7 @@ private:
 		
 		cout << "Homogeneous matrix: \n" << homogeneous << endl;
 		fprintf(stdout, "\nTranslation \n%f %f %f\n", homogeneous(0,3), homogeneous(1,3), homogeneous(2,3));
-		Eigen::Matrix<float, 4, 1> coeffs = q.coeffs();	
+		Eigen::Matrix<float, 4, 1> coeffs = q.coeffs();
 		fprintf(stdout, "Quaternion:\n%f %f %f %f\n", coeffs[0], coeffs[1], coeffs[2], coeffs[3]);
 		fprintf(stdout, "g2o edge:\n%f %f 0 0 0 %f %f\n", homogeneous(0,3), homogeneous(1,3), coeffs[2], coeffs[3]);
 		auto euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
@@ -199,7 +209,7 @@ private:
 
 	Eigen::Affine3f get_custom_translation(void){
 		Eigen::Affine3f translate = Eigen::Affine3f::Identity();
-		translate.translation() << 0.0, 0.0, 25;
+		translate.translation() << 0.0, 0.0, -1;
 		translate.rotate(Eigen::AngleAxisf(PI, Eigen::Vector3f::UnitY()));
 		return translate;
 	}
@@ -209,9 +219,9 @@ private:
 		viewer.addCoordinateSystem(1.0);
 		viewer.addCorrespondences<PointT>(source, target, correspondences);
 		pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb1(source);
-		pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb2(target);
+		pcl::visualization::PointCloudColorHandlerCustom<PointT> red(target, 230, 20, 20);
 		viewer.addPointCloud(source, rgb1, "source");
-		viewer.addPointCloud(target, rgb2, "target");
+		viewer.addPointCloud(target, red, "target");
 		while(! viewer.wasStopped())
 			viewer.spinOnce();
 	}
@@ -237,9 +247,9 @@ public:
 		fprintf(stdout, "Size of kps1_coord: %lu\nSize of kps2_coord: %lu\n", kps1_coord.size(), kps2_coord.size());
 		source = images2cloud(rgb1, depth1, kps1_coord, cloud_indexes1, cloud1_keypoints);
 		target = images2cloud(rgb2, depth2, kps2_coord, cloud_indexes2, cloud2_keypoints);
-		fill_correspondences();
-		Eigen::Affine3f translate = get_custom_translation();
-		translate_cloud(translate);
+		// fill_correspondences();
+		// Eigen::Affine3f translate = get_custom_translation();
+		// translate_cloud(translate);
 		simple_visualize();
 		// print_cloud_keypoints(cloud_indexes1, cloud1_keypoints);
 		// print_cloud_keypoints(cloud_indexes2, cloud2_keypoints);
@@ -247,7 +257,7 @@ public:
 		simple_icp();
 		display_homogeneous_to_quaternion();
 		simple_visualize();
-		save_to_pcd("/home/udit/Desktop/assembled.pcd");
+		// save_to_pcd("/home/udit/Desktop/assembled.pcd");
 	}
 };
 
