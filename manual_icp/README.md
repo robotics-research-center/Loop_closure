@@ -12,3 +12,8 @@
 	3. 85 119
 	4. 119 157
 	5. 119 161
+
+4. *Coordinate convention used in RTABMAP/g2o/ROS and PCL/ICP*: [REP 103](http://www.ros.org/reps/rep-0103.html)
+	1. Forward: x (Red)
+	2. Left: y (Green)
+	3. Upward: z (Blue)
