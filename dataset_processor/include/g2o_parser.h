@@ -69,6 +69,7 @@ public:
 
 	void start_processing(void){
 		parse_g2o_file();
+		// print_transforms();
 	}
 };
 

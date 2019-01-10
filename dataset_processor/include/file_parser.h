@@ -139,6 +139,11 @@ private:
 		coming = make_pair(lines[1][0], lines[1][1]);
 	}
 
+	void print_trajectory(void){
+		fprintf(stdout, "Going: %d\t%d\nComing: %d\t%d\n", going.first, going.second, 
+				coming.first, coming.second);
+	}
+
 public:
 	FileParser(const char* arg_file, pair<int, int>& go, pair<int, int>& come): 
 				file{arg_file}, going{go}, coming{come}{};
@@ -146,6 +151,7 @@ public:
 	void start_processing(void){
 		parse_file();
 		fill_trajectory();
+		// print_trajectory();
 	}
 };
 
@@ -181,6 +187,7 @@ private:
 		vector<string> going_images, coming_images;
 
 		if(ratio>=1){
+			cout << "ratio greater than 1\n";
 			for(int i=1; i<=min_length; ++i){
 				coming_images.push_back(images[coming_start+i-1]);
 				going_images.push_back(images[going_start+round(ratio*i)-1]);
@@ -194,7 +201,7 @@ private:
 		else{
 			for(int i=1; i<=min_length; ++i){
 				going_images.push_back(images[going_start+i-1]);
-				coming_images.push_back(images[coming_start+round(ratio*i)-1]);
+				coming_images.push_back(images[coming_start+round((1/ratio)*i)-1]);
 			}
 			reverse(coming_images.begin(), coming_images.end());
 			for(int i=0; i<going_images.size(); ++i){
@@ -207,6 +214,14 @@ private:
 		for(int i=0; i<image_pairs.size(); ++i){
 			cout << image_pairs[i].first << endl << image_pairs[i].second << endl;
 		}
+	}
+
+	void write_image_pairs(void){
+		ofstream file_write("image_pairs.txt");
+		for(auto rgb_pair : rgb_pairs){
+			file_write << rgb_pair.first << endl << rgb_pair.second << "\n---\n";
+		}
+		file_write.close();
 	}
 
 public:
@@ -224,15 +239,9 @@ public:
 		generate_pairs(rgb_pairs, rgb_images);
 		generate_pairs(depth_pairs, depth_images);
 		print_image_pairs(depth_pairs);
+		// write_image_pairs();
 	}
 	
-	void write_image_pairs(void){
-		ofstream file_write("image_pairs.txt");
-		for(auto rgb_pair : rgb_pairs){
-			file_write << rgb_pair.first << endl << rgb_pair.second << "\n---\n";
-		}
-		file_write.close();
-	}
 };
 
 #endif
