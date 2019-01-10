@@ -18,7 +18,7 @@ private:
 	vector<string>& depth_images;
 
 private:
-	int get_cloud_number(const string &str){
+	int get_image_number(const string &str){
 		int index = 0;
 		string result{};
 		while(str[index] != '.'){
@@ -59,7 +59,7 @@ private:
 		dirent* pointer;
 		while((pointer = readdir(directory)) != NULL){
 			if(pointer->d_name[0] != '.'){
-				list.push_back(get_cloud_number(pointer->d_name));
+				list.push_back(get_image_number(pointer->d_name));
 				if(extension_parsed == false){
 					get_extension(pointer->d_name, extension);
 					extension_parsed = true;
@@ -226,6 +226,13 @@ public:
 		print_image_pairs(depth_pairs);
 	}
 	
+	void write_image_pairs(void){
+		ofstream file_write("image_pairs.txt");
+		for(auto rgb_pair : rgb_pairs){
+			file_write << rgb_pair.first << endl << rgb_pair.second << "\n---\n";
+		}
+		file_write.close();
+	}
 };
 
 #endif

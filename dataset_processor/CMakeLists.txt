@@ -20,7 +20,5 @@ add_definitions(${PCL_DEFINITIONS})
 set(ALL_LIBS ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
 add_executable(calculate_rt src/calculate_rt.cpp)
-add_executable(mouse_click src/mouse_click.cpp)
 
 target_link_libraries(calculate_rt ${ALL_LIBS})
-target_link_libraries(mouse_click ${ALL_LIBS})
