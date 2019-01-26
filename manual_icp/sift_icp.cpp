@@ -191,6 +191,33 @@ private:
 		translate_cloud(homogeneous.inverse());
 	}
 
+	void complex_icp(void){
+
+		//initial guess
+		homogeneous << -0.968735, -0.211709, -0.129355, 7.142413,
+						0.210717, -0.977312, 0.0214677, 0.291002,
+						-0.130965, -0.00646067, 0.991366, 0.631806,
+						0, 0, 0, 1;
+
+		cout << "Guess transformation: \n" << homogeneous;
+
+		cout << "\n Taking SVD as guess transformation for ICP and calculating transformation \n";
+		pcl::IterativeClosestPoint<PointT, PointT> icp_g;
+		icp_g.setInputSource(source);
+		icp_g.setInputTarget(target);
+		PointCloudT transformed_g;
+		icp_g.align(transformed_g, homogeneous);
+		homogeneous = icp_g.getFinalTransformation();
+		// cout << "homogeneous matrix\n" << homogeneous;
+		correspondences = (*icp_g.correspondences_);
+		fprintf(stdout, "Has converged after guess?: %d\t Score: %g\n", icp_g.hasConverged(), icp_g.getFitnessScore());
+
+		transformPointCloud(*target, *target, homogeneous.inverse());
+
+	}
+
+
+
 	void display_homogeneous_to_quaternion(void){
 		Eigen::Matrix3f rotate;
 		for(int i = 0; i<3 ; i++)
