@@ -68,17 +68,31 @@ int main(int argc, char const *argv[])
 
 
 	pcl::IterativeClosestPoint<PointT, PointT> icp;
+	// pcl::IterativeClosestPointWithNormals<PointT, PointT> icp;
 	icp.setInputSource(cloud1);
 	icp.setInputTarget(cloud2);
 
-	// Set the max correspondence distance to 5cm (e.g., correspondences with higher distances will be ignored)
-	icp.setMaxCorrespondenceDistance (0.05);
-	// Set the maximum number of iterations (criterion 1)
-	icp.setMaximumIterations (50);
-	// Set the transformation epsilon (criterion 2)
-	icp.setTransformationEpsilon (1e-8);
-	// Set the euclidean distance difference epsilon (criterion 3)
-	icp.setEuclideanFitnessEpsilon (1);	
+	// // Set the max correspondence distance to 5cm (e.g., correspondences with higher distances will be ignored)
+	// icp.setMaxCorrespondenceDistance (0.05);
+	// // Set the maximum number of iterations (criterion 1)
+	// icp.setMaximumIterations (50);
+	// // Set the transformation epsilon (criterion 2)
+	// icp.setTransformationEpsilon (1e-8);
+	// // Set the euclidean distance difference epsilon (criterion 3)
+	// icp.setEuclideanFitnessEpsilon (1);	
+	// RANSAC parameters
+	// icp.setRANSACIterations();
+	// icp.setRANSACOutlierRejectionThreshold();
+
+	std::cout 	<< icp.getMaxCorrespondenceDistance() << " -> Max Correspondence Distance (default: 1.34078e+154) \n" 
+				<< icp.getMaximumIterations() << " -> Maximum Iterations (default: 10) \n"
+				<< icp.getTransformationEpsilon() << " -> Transformation Epsilon (default: 0) \n"
+				<< icp.getEuclideanFitnessEpsilon() << " -> Euclidean Fitness Epsilon (default: -1.79769e+308) \n"
+				<< icp.getRANSACIterations() << " -> RANSAC Iterations (default: 0) \n"
+				<< icp.getRANSACOutlierRejectionThreshold() << " -> RANSAC Outlier Rejection Threshold (default: 0.05) \n";
+
+
+
 
 
 	PointCloudT transformed;
