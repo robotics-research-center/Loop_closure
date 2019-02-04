@@ -6,6 +6,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/registration/icp.h>
 #include <pcl/registration/registration.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include <Eigen/Dense>
 
 typedef pcl::PointXYZRGB PointT;
@@ -14,7 +15,6 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 
 int main(int argc, char const *argv[])
 {	
-
 
 	if (argc != 4)
 	{
@@ -29,6 +29,9 @@ int main(int argc, char const *argv[])
 	}
 
 	PointCloudT::Ptr cloud1 (new PointCloudT);
+	PointCloudT::Ptr cloud2 (new PointCloudT);
+	PointCloudT::Ptr cloud_filtered (new PointCloudT);
+
 
 	if (pcl::io::loadPCDFile<PointT> (argv[1], *cloud1) == -1) //* load the file
 	{
@@ -38,10 +41,19 @@ int main(int argc, char const *argv[])
 
 	std::cout   << "Loaded "
 				<< cloud1->width * cloud1->height
-				<< " data points from test_pcd.pcd "
+				<< " data points from test_pcd.pcd i.e. " << argv[1]
 				<< std::endl;
 
-	PointCloudT::Ptr cloud2 (new PointCloudT);
+
+	pcl::StatisticalOutlierRemoval<PointT> sor;
+	sor.setInputCloud (cloud1);
+	sor.setMeanK (50);
+	sor.setStddevMulThresh (1.0);
+	sor.filter (*cloud_filtered);
+
+	pcl::io::savePCDFileASCII("filtered_cloud_1.pcd", *cloud_filtered);
+	std::cout << "Cloud filtered_cloud_1 " << '\n';
+
 
 	if (pcl::io::loadPCDFile<PointT> (argv[2], *cloud2) == -1) //* load the file
 	{
@@ -51,7 +63,7 @@ int main(int argc, char const *argv[])
 
 	std::cout   << "Loaded "
 				<< cloud2->width * cloud2->height
-				<< " data points from test_pcd2.pcd "
+				<< " data points from test_pcd2.pcd i.e. " << argv[2]
 				<< std::endl;
 
 
