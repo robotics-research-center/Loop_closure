@@ -1,0 +1,30 @@
+1. Cartograhper on demo file:-
+	1. $ roslaunch cartographer_ros demo_backpack_2d.launch bag_filename:=${HOME}/Downloads/cartographer_paper_deutsches_museum.bag
+
+	2. Error:
+	[ INFO] [1555409027.236835694, 1405076296.503967961]: I0416 15:33:47.000000 17593 ordered_multi_queue
+.cc:172] All sensor data for trajectory 0 is available starting at '635406730964746083'.
+terminate called after throwing an instance of 'std::out_of_range'
+  what():  map::at
+
+2. Own bag file:- 
+  	1. Topic:- 
+  		1. /scan
+  		2. /tf
+  		3. /odom
+  		4. /imu
+  		5. /points
+
+  	2. I have tried various combinations of above topic and node starts running information without any error, but when as soon I subscribe to `/map` topic, the node throws an error without giving much infromation. 
+  	Error is:-
+  	exit code -11, cmd /home/cair/softw
+	ares/cartographer_ws/install_isolated/lib/cartographer_ros/cartographer_occupancy_grid_node -resoluti
+	on 0.05 __name:=cartographer_occupancy_grid_node
+
+	3. These are my launch file and lua scripts.
+
+3.	1. What are the things I might be doing wrong?
+	
+	2. Could there be possibility that my installation might be erroneous(How could I check that, since I am to do all the steps without any error in installation proces?)
+
+	3. Or my launch files or configurations are wrong?
